@@ -72,7 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
               }, 5000);
 
               // Refresh activities to show updated participant list
-              fetchActivities();
+              await fetchActivities();
             } else {
               const result = await response.json();
               messageDiv.textContent = result.detail || "Failed to unregister";
@@ -116,7 +116,7 @@ document.addEventListener("DOMContentLoaded", () => {
         signupForm.reset();
 
         // Refresh activities to show new participant
-        fetchActivities();
+        await fetchActivities();
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "message error";
