@@ -21,11 +21,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const spotsLeft = details.max_participants - details.participants.length;
 
-        // Build participants section (bulleted list)
+        // Build participants section (without bullets)
         const participantsSection = details.participants.length
-          ? `<div class="participants"><strong>Participants:</strong><ul class="participants-list">${details.participants
-              .map((p) => `<li>${p}</li>`)
-              .join("")}</ul></div>`
+          ? `<div class="participants"><strong>Participants:</strong><div class="participants-list">${details.participants
+              .map((p) => `<div class="participant-item" data-activity="${encodeURIComponent(name)}" data-email="${encodeURIComponent(p)}"><span>${p}</span><button class="delete-btn" aria-label="Remove participant">✕</button></div>`)
+              .join("")}</div></div>`
           : `<div class="participants"><strong>Participants:</strong><p class="no-participants">No participants yet</p></div>`;
 
         activityCard.innerHTML = `
@@ -43,6 +43,49 @@ document.addEventListener("DOMContentLoaded", () => {
         option.value = name;
         option.textContent = name;
         activitySelect.appendChild(option);
+      });
+
+      // Add event listeners to delete buttons
+      document.querySelectorAll(".delete-btn").forEach((btn) => {
+        btn.addEventListener("click", async (event) => {
+          event.preventDefault();
+          const participantItem = btn.closest(".participant-item");
+          const activity = decodeURIComponent(participantItem.dataset.activity);
+          const email = decodeURIComponent(participantItem.dataset.email);
+
+          try {
+            const response = await fetch(
+              `/activities/${encodeURIComponent(activity)}/unregister?email=${encodeURIComponent(email)}`,
+              {
+                method: "DELETE",
+              }
+            );
+
+            if (response.ok) {
+              messageDiv.textContent = `Unregistered ${email} from ${activity}`;
+              messageDiv.className = "message success";
+              messageDiv.classList.remove("hidden");
+
+              // Hide message after 5 seconds
+              setTimeout(() => {
+                messageDiv.classList.add("hidden");
+              }, 5000);
+
+              // Refresh activities to show updated participant list
+              fetchActivities();
+            } else {
+              const result = await response.json();
+              messageDiv.textContent = result.detail || "Failed to unregister";
+              messageDiv.className = "message error";
+              messageDiv.classList.remove("hidden");
+            }
+          } catch (error) {
+            messageDiv.textContent = "Failed to unregister. Please try again.";
+            messageDiv.className = "message error";
+            messageDiv.classList.remove("hidden");
+            console.error("Error unregistering:", error);
+          }
+        });
       });
     } catch (error) {
       activitiesList.innerHTML = "<p>Failed to load activities. Please try again later.</p>";
