@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Build participants section (without bullets)
         const participantsSection = details.participants.length
           ? `<div class="participants"><strong>Participants:</strong><div class="participants-list">${details.participants
-              .map((p) => `<div class="participant-item" data-activity="${encodeURIComponent(name)}" data-email="${encodeURIComponent(p)}"><span>${p}</span><button class="delete-btn" aria-label="Remove participant">✕</button></div>`)
+              .map((p) => `<div class="participant-item" data-activity="${name}" data-email="${p}"><span>${p}</span><button class="delete-btn" aria-label="Remove participant">✕</button></div>`)
               .join("")}</div></div>`
           : `<div class="participants"><strong>Participants:</strong><p class="no-participants">No participants yet</p></div>`;
 
@@ -50,8 +50,8 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.addEventListener("click", async (event) => {
           event.preventDefault();
           const participantItem = btn.closest(".participant-item");
-          const activity = decodeURIComponent(participantItem.dataset.activity);
-          const email = decodeURIComponent(participantItem.dataset.email);
+          const activity = participantItem.dataset.activity;
+          const email = participantItem.dataset.email;
 
           try {
             const response = await fetch(
